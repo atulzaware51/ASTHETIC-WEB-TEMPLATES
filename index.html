@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aesthetic Web Theme Gallery & Editor</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Custom Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Monoton&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Chivo+Mono&display=swap" rel="stylesheet">
+    <style>
+        /* --- GLOBAL STYLES --- */
+        
+        /* Animated Gradient Background */
+        .animated-gradient-bg {
+            background: linear-gradient(-45deg, #1d2671, #c33764, #740263, #1d2671);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            color: #e5e7eb;
+        }
+
+        /* --- EDITOR-SPECIFIC STYLES --- */
+        #website-preview {
+            position: relative;
+            background-color: white;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+        }
+
+        .design-element {
+            position: absolute;
+            cursor: grab;
+            padding: 8px;
+            border-radius: 6px;
+            transition: box-shadow 0.1s;
+            user-select: none;
+            min-width: 50px;
+        }
+        
+        .design-element.selected {
+            box-shadow: 0 0 0 3px #10b981, 0 0 0 6px rgba(16, 185, 129, 0.5); 
+            cursor: move;
+        }
+
+        .element-text-input {
+            width: 100%;
+            background: transparent;
+            border: none;
+            color: inherit;
+            font-size: inherit;
+            font-weight: inherit;
+            padding: 0;
+            margin: 0;
+            resize: none;
+            outline: none;
+        }
+
+        /* --- THEME GALLERY PREVIEW STYLES --- */
+        
+        /* Brutalist Style */
+        .brutalist-card {
+            font-family: monospace;
+            border: 4px solid black;
+            background-color: #e0e0e0;
+            color: #1f2937;
+            box-shadow: 10px 10px 0 0 #1f2937;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .brutalist-card:hover { transform: translate(-3px, -3px); box-shadow: 13px 13px 0 0 #1f2937; }
+        .brutalist-header { background-color: #374151; color: #ffffff; padding: 8px; border-bottom: 4px solid black; text-align: right; border-radius: 0; }
+
+        /* Vaporwave Style */
+        .vaporwave-card {
+            font-family: 'Monoton', cursive;
+            background: linear-gradient(135deg, #4c2a7a, #0b0b2e);
+            color: #8cffff;
+            border: 2px solid #ff42d3;
+            box-shadow: 0 0 15px #ff42d3, 0 0 10px #8cffff;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .vaporwave-card:hover { transform: scale(1.02); box-shadow: 0 0 20px #ff42d3, 0 0 15px #8cffff; }
+        .vaporwave-header { font-size: 30px; text-shadow: 0 0 5px #ff42d3; text-align: center; }
+
+        /* Minimalist Style */
+        .minimalist-card {
+            background-color: white;
+            color: #1f2937;
+            border: 1px solid #d1d5db;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: background-color 0.2s;
+        }
+        .minimalist-card:hover { background-color: #f3f4f6; }
+        .minimalist-header { font-weight: 200; color: #6b7280; text-align: left; border-bottom: 1px solid #d1d5db; padding-bottom: 4px; }
+
+        /* Neumorphic Style */
+        .neumorphic-card {
+            background: #e0e0e0;
+            color: #374151;
+            border-radius: 20px;
+            box-shadow: 8px 8px 16px #bebebe, -8px -8px 16px #ffffff;
+            transition: all 0.2s;
+        }
+        .neumorphic-card:hover {
+            box-shadow: inset 5px 5px 10px #bebebe, inset -5px -5px 10px #ffffff;
+        }
+        .neumorphic-header {
+            color: #4f46e5;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        /* Cyberpunk Style */
+        .cyberpunk-card {
+            font-family: 'Chivo Mono', monospace;
+            background: #000000;
+            color: #38bdf8; /* Sky Blue */
+            border: 1px solid #c026d3; /* Pink */
+            box-shadow: 0 0 10px #38bdf8, 0 0 20px #c026d3;
+            transition: all 0.2s;
+        }
+        .cyberpunk-card:hover {
+            transform: skew(-2deg);
+        }
+        .cyberpunk-header {
+            color: #a3e635; /* Lime */
+            text-shadow: 0 0 5px #a3e635;
+            border-bottom: 1px dashed #c026d3;
+        }
+    </style>
+</head>
+<body class="animated-gradient-bg p-4 md:p-8">
+
+    <div class="max-w-7xl mx-auto">
+        <header class="text-center mb-8">
+            <h1 class="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-indigo-500 mb-2">
+                Aesthetic Web Lab
+            </h1>
+            <p class="text-indigo-200 text-xl font-light" id="subtitle">Select a theme to start designing, or build a new one.</p>
+        </header>
+
+        <main id="app-container">
+            <!-- Content (Gallery or Editor) will be rendered here by JavaScript -->
+        </main>
+    </div>
+
+    <script>
+        // --- GLOBAL STATE ---
+        let viewState = 'gallery';
+        let currentThemeId = null; 
+
+        // Editor state (retained from previous version)
+        let currentElement = null; 
+        let isDragging = false;
+        let dragOffsetX, dragOffsetY;
+        let elementCounter = 0;
+        
+        // --- THEME & TEMPLATE DEFINITIONS ---
+        const THEMES = {
+            minimalist: {
+                name: "Minimalist Elegance",
+                description: "Clean, simple, and focused on content. Perfect for professional portfolios.",
+                fontClass: "font-sans",
+                primaryColor: "gray-800",
+                bgColor: "white",
+                initialElements: (color, font) => [
+                    { type: 'text', content: 'Minimalist Portfolio', classes: `text-4xl font-light text-${color} border-b border-gray-300`, top: 30, left: 50, color: 'gray-800', size: 36, width: 300 },
+                    { type: 'text', content: 'LESS IS MORE', classes: `text-xl italic text-gray-500`, top: 100, left: 50, color: 'gray-500', size: 20, width: 250 },
+                    { type: 'shape', content: 'w-20 h-20 rounded-full', bgColor: 'white', borderColor: 'gray-800', borderWidth: 1, top: 150, left: 500, width: 80, height: 80 },
+                ]
+            },
+            vaporwave: {
+                name: "Vaporwave Neon Dream",
+                description: "1980s retro futurism with neon colors, heavy shadows, and unique typography.",
+                fontClass: "font-['Monoton']",
+                primaryColor: "pink-500",
+                bgColor: "#0b0b2e",
+                initialElements: (color, font) => [
+                    { type: 'text', content: 'A E S T H E T I C', classes: `text-6xl text-cyan-400 ${font} font-bold`, top: 80, left: 100, color: 'cyan-400', size: 60, width: 500 },
+                    { type: 'text', content: 'V I S U A L S', classes: `text-3xl text-pink-500 ${font} font-light`, top: 150, left: 150, color: 'pink-500', size: 30, width: 300 },
+                    { type: 'shape', content: 'w-full h-1/4', bgColor: '#4c2a7a', top: 0, left: 0, width: '100%', height: '25%' },
+                ]
+            },
+            brutalist: {
+                name: "Brutalist Block Power",
+                description: "Raw and rugged design with sharp edges, strong borders, and monospace fonts.",
+                fontClass: "font-mono",
+                primaryColor: "red-700",
+                bgColor: "#e0e0e0",
+                initialElements: (color, font) => [
+                    { type: 'text', content: 'B L O C K H E A D', classes: `text-5xl text-gray-900 ${font} font-extrabold border-4 border-black p-2`, top: 50, left: 50, color: 'gray-900', size: 48, width: 400 },
+                    { type: 'text', content: 'DATA IS TRUTH', classes: `text-xl text-red-700 ${font} underline`, top: 130, left: 60, color: 'red-700', size: 24, width: 300 },
+                    { type: 'shape', content: 'w-48 h-10 border-4 border-black', bgColor: 'gray-500', top: 200, left: 50, width: 192, height: 40 },
+                ]
+            },
+            neumorphic: {
+                name: "Neumorphic Soft UI",
+                description: "Modern, soft, and slightly raised components. Focus on subtle shadows and light backgrounds.",
+                fontClass: "font-sans",
+                primaryColor: "indigo-600",
+                bgColor: "#e0e0e0",
+                initialElements: (color, font) => [
+                    { type: 'text', content: 'Soft Design System', classes: `text-4xl font-semibold text-indigo-700`, top: 50, left: 50, color: '#4f46e5', size: 36, width: 350 },
+                    { type: 'shape', content: 'w-32 h-32 rounded-full', bgColor: '#e0e0e0', shadow: '8px 8px 16px #bebebe, -8px -8px 16px #ffffff', top: 150, left: 500, width: 128, height: 128 },
+                    { type: 'text', content: 'Welcome Button', classes: `text-sm text-gray-700 p-4 rounded-xl`, top: 180, left: 50, color: '#374151', size: 14, width: 150 },
+                ]
+            },
+            cyberpunk: {
+                name: "Cyberpunk Glitch",
+                description: "Dystopian aesthetic with bright neon colors against deep blacks. High contrast and aggressive styling.",
+                fontClass: "font-mono",
+                primaryColor: "lime-400",
+                bgColor: "#000000",
+                initialElements: (color, font) => [
+                    { type: 'text', content: '[ERROR: SYSTEM ONLINE]', classes: `text-5xl text-red-500 ${font} font-extrabold`, top: 80, left: 50, color: '#ef4444', size: 48, width: 500 },
+                    { type: 'text', content: '> ACCESS GRANTED // R34D 0NL Y', classes: `text-xl text-lime-400 ${font}`, top: 150, left: 60, color: '#a3e635', size: 20, width: 400 },
+                    { type: 'shape', content: 'w-full h-1/4 border-y-2 border-fuchsia-500', bgColor: '#0d111c', top: 200, left: 0, width: '100%', height: '25%' },
+                ]
+            }
+        };
+
+        // --- CORE APPLICATION VIEWS ---
+
+        function renderApp() {
+            const container = document.getElementById('app-container');
+            if (viewState === 'gallery') {
+                document.getElementById('subtitle').textContent = "Select a theme to start designing, or build a new one. (Total Themes: " + Object.keys(THEMES).length + ")";
+                container.innerHTML = renderGallery();
+                // Attach filtering logic after rendering
+                document.getElementById('theme-search').addEventListener('input', filterThemes);
+            } else if (viewState === 'editor' && currentThemeId) {
+                document.getElementById('subtitle').textContent = `Editing: ${THEMES[currentThemeId].name} Theme`;
+                container.innerHTML = renderEditorUI();
+                initializeEditor(currentThemeId);
+            }
+        }
+        
+        // Gallery View Renderer with Search
+        function renderGallery() {
+            let galleryHtml = `
+                <div class="mb-8 p-4 bg-gray-900/50 rounded-xl shadow-lg">
+                    <label for="theme-search" class="block text-lg font-semibold mb-2 text-teal-300">Theme Search</label>
+                    <input type="text" id="theme-search" placeholder="Filter themes by name or style (e.g., 'wave', 'soft', 'block')..." 
+                           class="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-teal-500 focus:border-teal-500">
+                </div>
+
+                <div id="theme-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 p-4">
+            `;
+
+            Object.entries(THEMES).forEach(([id, theme]) => {
+                // Determine CSS classes for the card based on the theme ID
+                const cardClass = `${id}-card theme-card cursor-pointer rounded-xl p-6 h-96 flex flex-col justify-between shadow-xl`;
+                const headerClass = `${id}-header mb-4`;
+
+                galleryHtml += `
+                    <div id="card-${id}" class="${cardClass}" onclick="switchToEditor('${id}')" data-keywords="${theme.name.toLowerCase()} ${theme.description.toLowerCase()} ${id}">
+                        <div>
+                            <div class="${headerClass}">
+                                <h3 class="font-bold">${theme.name.toUpperCase()}</h3>
+                            </div>
+                            <p class="text-sm mt-2">${theme.description}</p>
+                        </div>
+                        <button class="w-full mt-4 py-2 rounded-lg font-semibold 
+                                     ${id === 'brutalist' ? 'bg-black text-white border-4 border-black' : 
+                                       id === 'vaporwave' ? 'bg-pink-500 text-white' : 
+                                       id === 'minimalist' ? 'bg-gray-800 text-white' :
+                                       id === 'neumorphic' ? 'bg-indigo-600 text-white' :
+                                       id === 'cyberpunk' ? 'bg-lime-400 text-gray-900' : 'bg-gray-800 text-white'} 
+                                       hover:opacity-80 transition duration-150">
+                            Design This Theme
+                        </button>
+                    </div>
+                `;
+            });
+
+            galleryHtml += `</div>`;
+            return galleryHtml;
+        }
+        
+        // Theme Filtering Logic
+        function filterThemes() {
+            const query = document.getElementById('theme-search').value.toLowerCase();
+            document.querySelectorAll('.theme-card').forEach(card => {
+                const keywords = card.getAttribute('data-keywords');
+                if (keywords.includes(query) || query === '') {
+                    card.classList.remove('hidden');
+                } else {
+                    card.classList.add('hidden');
+                }
+            });
+        }
+
+
+        // Editor View Structure
+        function renderEditorUI() {
+            return `
+                <section class="flex flex-col lg:flex-row gap-8">
+                    <!-- 1. Customization Panel (Sidebar) -->
+                    <aside id="config-panel" class="lg:w-1/3 bg-gray-800/80 p-6 rounded-xl shadow-2xl border border-gray-700 h-full lg:sticky top-8">
+                        <button onclick="switchView('gallery')" class="flex items-center text-sm font-semibold text-teal-400 hover:text-teal-300 mb-6 transition">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" /></svg>
+                            Back to Theme Gallery
+                        </button>
+                        
+                        <h2 class="text-3xl font-bold mb-4 text-teal-300">Tool Palette</h2>
+                        
+                        <!-- Tab Controls: Elements vs. Properties -->
+                        <div class="mb-4 border-b border-gray-700">
+                            <div class="flex space-x-2 -mb-px">
+                                <button data-tool="Elements" class="tool-tab px-4 py-2 text-sm font-medium border-b-2 border-teal-400 text-white transition duration-200">
+                                    Elements
+                                </button>
+                                <button data-tool="Properties" class="tool-tab px-4 py-2 text-sm font-medium border-b-2 border-transparent text-gray-400 hover:text-white transition duration-200">
+                                    Element Properties
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- --- TOOL PANE: ELEMENTS LIBRARY --- -->
+                        <div id="tool-Elements" class="tool-pane">
+                            <h3 class="text-xl font-bold mb-4 text-teal-100">Add Element</h3>
+                            <div class="grid grid-cols-2 gap-4">
+                                <button onclick="addElement('text', 'New Text Block')" class="flex items-center justify-center bg-gray-700 hover:bg-gray-600 p-3 rounded-lg font-semibold text-sm transition">
+                                    <span class="mr-2 text-lg">T</span> Add Text
+                                </button>
+                                <button onclick="addElement('image', 'https://placehold.co/150x100/34d399/FFFFFF?text=IMG')" class="flex items-center justify-center bg-gray-700 hover:bg-gray-600 p-3 rounded-lg font-semibold text-sm transition">
+                                    <span class="mr-2">🖼️</span> Add Image
+                                </button>
+                                <button onclick="addElement('shape', 'bg-sky-500 w-24 h-24 rounded-full')" class="flex items-center justify-center bg-gray-700 hover:bg-gray-600 p-3 rounded-lg font-semibold text-sm transition">
+                                    <span class="mr-2">🔵</span> Add Shape
+                                </button>
+                                <button onclick="deleteElement()" id="delete-btn" class="flex items-center justify-center bg-red-800 hover:bg-red-700 p-3 rounded-lg font-semibold text-sm transition" disabled>
+                                    <span class="mr-2">🗑️</span> Delete
+                                </button>
+                            </div>
+
+                        </div>
+
+                        <!-- --- TOOL PANE: ELEMENT PROPERTIES --- -->
+                        <div id="tool-Properties" class="tool-pane hidden">
+                            <div id="properties-content">
+                                <p class="text-gray-400 text-center py-8">Select an element on the canvas to view its properties here.</p>
+                            </div>
+                        </div>
+
+                    </aside>
+
+                    <!-- 2. Website Preview Area (The Interactive Canvas) -->
+                    <section class="lg:w-2/3">
+                        <h2 class="text-3xl font-bold mb-4 text-teal-300">Design Canvas</h2>
+                        
+                        <!-- Mock Browser Frame -->
+                        <div class="bg-gray-900 rounded-xl shadow-2xl p-2 md:p-4 mb-4">
+                            <!-- Browser Address Bar Mock -->
+                            <div class="flex items-center space-x-2 p-3 bg-gray-800 rounded-t-lg">
+                                <div class="w-3 h-3 bg-red-500 rounded-full"></div>
+                                <div class="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                                <div class="w-3 h-3 bg-green-500 rounded-full"></div>
+                                <div class="flex-grow bg-gray-700 text-gray-400 text-sm p-1 rounded-md text-center">
+                                    design-lab.com/edit
+                                </div>
+                            </div>
+
+                            <!-- The Live Preview Container (The Canvas) -->
+                            <div id="website-preview" class="preview-screen h-[600px] md:h-[800px] w-full p-0">
+                                <!-- Elements will be injected here -->
+                            </div>
+                        </div>
+                    </section>
+                </section>
+            `;
+        }
+
+        // --- View Switching and Initialization ---
+
+        function switchView(newView, themeId = null) {
+            viewState = newView;
+            if (newView === 'editor') {
+                currentThemeId = themeId;
+            } else {
+                currentThemeId = null;
+            }
+            renderApp();
+        }
+
+        function switchToEditor(themeId) {
+            switchView('editor', themeId);
+        }
+
+        function initializeEditor(themeId) {
+            // Re-select tool tab, if properties was active
+            switchToolPane('Elements'); 
+
+            // Initialize event listeners for the new editor UI
+            addToolPanelListeners();
+            addDragAndDropListeners();
+            
+            // Load theme elements onto the canvas
+            loadThemeElements(themeId);
+            unselectAllElements();
+        }
+        
+        function loadThemeElements(themeId) {
+            const preview = document.getElementById('website-preview');
+            const theme = THEMES[themeId];
+            
+            // Set the canvas background and font
+            preview.style.backgroundColor = theme.bgColor;
+            preview.className = preview.className.replace(/\bfont-\w+\b/g, '') + ' ' + theme.fontClass;
+            
+            // Clear existing elements
+            preview.innerHTML = '';
+            elementCounter = 0; 
+
+            const elements = theme.initialElements(theme.primaryColor, theme.fontClass);
+
+            elements.forEach((el) => {
+                elementCounter++;
+                const newElement = document.createElement('div');
+                newElement.id = `element-${elementCounter}`;
+                newElement.classList.add('design-element', theme.fontClass);
+                
+                // Set position and zIndex
+                newElement.style.top = `${el.top}px`;
+                newElement.style.left = `${el.left}px`;
+                newElement.style.zIndex = el.zIndex !== undefined ? el.zIndex : 10;
+                
+                // Set data attributes for property panel
+                newElement.dataset.type = el.type;
+                newElement.dataset.config = el.content; 
+                newElement.dataset.color = el.color || theme.primaryColor; 
+                newElement.dataset.size = el.size || 16;
+                newElement.dataset.width = el.width || 200;
+                newElement.dataset.height = el.height || 50;
+                newElement.dataset.shadow = el.shadow || ''; // For neumorphic
+                
+                // Apply initial size and classes
+                newElement.style.width = typeof el.width === 'number' ? `${el.width}px` : el.width;
+                newElement.style.height = typeof el.height === 'number' ? `${el.height}px` : el.height;
+                if (el.classes) {
+                    newElement.classList.add(...el.classes.split(' '));
+                }
+
+                if (el.type === 'text') {
+                    // Text elements need dynamic styles and an editable area
+                    newElement.style.color = newElement.dataset.color.startsWith('#') ? newElement.dataset.color : 'rgb(31, 41, 55)'; // Fallback color
+                    newElement.style.fontSize = `${newElement.dataset.size}px`;
+
+                    newElement.innerHTML = `<textarea class="element-text-input" rows="1">${el.content}</textarea>`;
+                    newElement.querySelector('textarea').addEventListener('input', (e) => {
+                        newElement.dataset.config = e.target.value;
+                    });
+                } else if (el.type === 'shape') {
+                    // Shape elements use background color style
+                    newElement.style.backgroundColor = el.bgColor || '#374151';
+                    newElement.style.padding = 0;
+                    if (el.borderColor && el.borderWidth) {
+                        newElement.style.border = `${el.borderWidth}px solid ${el.borderColor}`;
+                    }
+                    if (el.shadow) {
+                        newElement.style.boxShadow = el.shadow;
+                    }
+                    newElement.innerHTML = '';
+                } else if (el.type === 'image') {
+                    newElement.style.padding = 0; 
+                    newElement.innerHTML = `<img src="${el.content}" alt="Design Image" class="w-full h-full object-cover rounded-md" onerror="this.onerror=null; this.src='${el.content}';">`;
+                }
+
+                preview.appendChild(newElement);
+            });
+        }
+
+
+        // --- EDITOR LOGIC ---
+
+        function addElement(type, content) {
+            const preview = document.getElementById('website-preview');
+            elementCounter++;
+            const theme = THEMES[currentThemeId];
+            
+            const newElement = document.createElement('div');
+            newElement.id = `element-${elementCounter}`;
+            newElement.classList.add('design-element', theme.fontClass);
+            newElement.style.top = '100px'; 
+            newElement.style.left = '100px';
+            newElement.style.zIndex = 10;
+            
+            // Set data attributes
+            newElement.dataset.type = type;
+            newElement.dataset.config = content; 
+            newElement.dataset.color = theme.primaryColor.startsWith('#') ? theme.primaryColor : 'rgb(31, 41, 55)'; // default to dark gray
+            newElement.dataset.size = '16';
+            newElement.dataset.width = '200';
+            newElement.dataset.height = '50';
+            newElement.dataset.shadow = '';
+
+            if (type === 'text') {
+                newElement.style.width = '200px';
+                newElement.style.color = newElement.dataset.color;
+                newElement.style.fontSize = `${newElement.dataset.size}px`;
+                newElement.innerHTML = `<textarea class="element-text-input" rows="1">${content}</textarea>`;
+                newElement.querySelector('textarea').addEventListener('input', (e) => {
+                    newElement.dataset.config = e.target.value;
+                });
+            } else if (type === 'image') {
+                newElement.style.width = '150px';
+                newElement.style.height = '100px';
+                newElement.style.padding = '0';
+                newElement.innerHTML = `<img src="${content}" alt="Design Image" class="w-full h-full object-cover rounded-md" onerror="this.onerror=null; this.src='https://placehold.co/150x100/34d399/FFFFFF?text=IMG';">`;
+            } else if (type === 'shape') {
+                newElement.style.width = '100px';
+                newElement.style.height = '100px';
+                newElement.style.padding = '0';
+                newElement.style.backgroundColor = '#34d399';
+                newElement.innerHTML = '';
+            }
+
+            preview.appendChild(newElement);
+            selectElement(newElement); // Auto-select the new element
+            addDragAndDropListeners(); // Re-apply listeners
+        }
+        
+        function selectElement(element) {
+            unselectAllElements();
+            currentElement = element;
+            currentElement.classList.add('selected');
+            document.getElementById('delete-btn').disabled = false;
+            
+            updatePropertiesPanel();
+        }
+
+        function unselectAllElements() {
+            document.querySelectorAll('.design-element').forEach(el => el.classList.remove('selected'));
+            currentElement = null;
+            const deleteBtn = document.getElementById('delete-btn');
+            if (deleteBtn) deleteBtn.disabled = true;
+            
+            const propertiesDiv = document.getElementById('properties-content');
+            if (propertiesDiv) propertiesDiv.innerHTML = '<p class="text-gray-400 text-center py-8">Select an element on the canvas to view its properties here.</p>';
+            
+            if (viewState === 'editor') {
+                switchToolPane('Elements'); 
+            }
+        }
+
+        function deleteElement() {
+            if (currentElement) {
+                currentElement.remove();
+                unselectAllElements();
+            }
+        }
+        
+        function updatePropertiesPanel() {
+            if (!currentElement) return;
+
+            switchToolPane('Properties');
+
+            const type = currentElement.dataset.type;
+            const propertiesDiv = document.getElementById('properties-content');
+
+            // Get current styles for position
+            const top = currentElement.style.top.replace('px', '');
+            const left = currentElement.style.left.replace('px', '');
+            
+            let html = `
+                <h3 class="text-xl font-bold mb-4 text-white">${type.toUpperCase()} Properties</h3>
+                <div class="space-y-4">
+            `;
+            
+            // Helper for RGB to Hex conversion
+            const rgbToHex = (rgb) => {
+                const [r, g, b] = rgb.match(/\d+/g);
+                return "#" + ((1 << 24) + (parseInt(r) << 16) + (parseInt(g) << 8) + parseInt(b)).toString(16).slice(1);
+            };
+
+            // 1. Position Controls
+            html += `
+                <label class="block text-sm font-semibold text-gray-300">Position (X, Y)</label>
+                <div class="flex space-x-2">
+                    <input type="number" id="prop-left" value="${Math.round(parseFloat(left))}" oninput="applyElementProperty('left', this.value + 'px')" placeholder="Left" class="w-1/2 p-2 bg-gray-700 border border-gray-600 rounded-lg text-white">
+                    <input type="number" id="prop-top" value="${Math.round(parseFloat(top))}" oninput="applyElementProperty('top', this.value + 'px')" placeholder="Top" class="w-1/2 p-2 bg-gray-700 border border-gray-600 rounded-lg text-white">
+                </div>
+            `;
+            
+            // 2. Size Controls (for all draggable elements)
+            html += `
+                <label class="block text-sm font-semibold text-gray-300">Size</label>
+                <div class="flex space-x-2">
+                    <input type="number" id="prop-width" value="${currentElement.offsetWidth}" oninput="applyElementProperty('width', this.value + 'px')" placeholder="Width" class="w-1/2 p-2 bg-gray-700 border border-gray-600 rounded-lg text-white">
+                    <input type="number" id="prop-height" value="${currentElement.offsetHeight}" oninput="applyElementProperty('height', this.value + 'px')" placeholder="Height" class="w-1/2 p-2 bg-gray-700 border border-gray-600 rounded-lg text-white">
+                </div>
+            `;
+
+
+            // 3. Type-Specific Controls (Text)
+            if (type === 'text') {
+                 // Text/Content Editor
+                const currentText = currentElement.querySelector('textarea').value;
+                html += `
+                    <label class="block text-sm font-semibold text-gray-300">Content</label>
+                    <textarea id="prop-content" oninput="applyElementProperty('content', this.value)" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-lg text-white">${currentText}</textarea>
+                `;
+
+                // Color Picker
+                const computedColor = window.getComputedStyle(currentElement).color;
+                let hexColor = '#000000';
+                try {
+                    hexColor = rgbToHex(computedColor);
+                } catch (e) { /* ignore */ }
+
+
+                html += `
+                    <label class="block text-sm font-semibold text-gray-300">Text Color</label>
+                    <input type="color" id="prop-color" value="${hexColor}" oninput="applyElementProperty('color', this.value)" class="w-full h-10 p-1 border border-gray-600 rounded-lg">
+                `;
+                
+                // Font Size
+                const currentFontSize = currentElement.style.fontSize.replace('px', '') || currentElement.dataset.size;
+                html += `
+                    <label class="block text-sm font-semibold text-gray-300">Font Size (px)</label>
+                    <input type="range" min="10" max="100" id="prop-size" value="${currentFontSize}" oninput="applyElementProperty('size', this.value + 'px')" class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer range-lg">
+                    <span class="text-xs text-gray-400">Current Size: <span id="prop-size-output">${currentFontSize}</span>px</span>
+                `;
+            } 
+            
+            // 4. Type-Specific Controls (Shape)
+            if (type === 'shape') {
+                const computedBg = window.getComputedStyle(currentElement).backgroundColor;
+                let bgHex = '#000000';
+                try {
+                    bgHex = rgbToHex(computedBg);
+                } catch (e) { /* ignore */ }
+
+                html += `
+                    <label class="block text-sm font-semibold text-gray-300">Background Color</label>
+                    <input type="color" id="prop-bg-color" value="${bgHex}" oninput="applyElementProperty('backgroundColor', this.value)" class="w-full h-10 p-1 border border-gray-600 rounded-lg">
+                    
+                    <label class="block text-sm font-semibold text-gray-300">Border Radius (px)</label>
+                    <input type="number" id="prop-radius" value="${parseFloat(currentElement.style.borderRadius)}" oninput="applyElementProperty('borderRadius', this.value + 'px')" placeholder="Radius" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-lg text-white">
+
+                    <label class="block text-sm font-semibold text-gray-300">Box Shadow (CSS value)</label>
+                    <input type="text" id="prop-shadow" value="${currentElement.style.boxShadow}" oninput="applyElementProperty('boxShadow', this.value)" placeholder="e.g. 5px 5px 10px gray" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-lg text-white">
+                `;
+            }
+
+            html += `</div>`;
+            propertiesDiv.innerHTML = html;
+        }
+
+        // Applies a property change from the panel to the element
+        function applyElementProperty(prop, value) {
+            if (!currentElement) return;
+            const textarea = currentElement.querySelector('textarea');
+
+            if (prop === 'left' || prop === 'top' || prop === 'width' || prop === 'height' || prop === 'backgroundColor' || prop === 'borderRadius' || prop === 'boxShadow') {
+                currentElement.style[prop] = value;
+            } else if (prop === 'color') {
+                currentElement.style.color = value;
+            } else if (prop === 'size') {
+                currentElement.style.fontSize = value;
+                const output = document.getElementById('prop-size-output');
+                if (output) output.textContent = value.replace('px', '');
+            } else if (prop === 'content' && textarea) {
+                // Update the textarea inside the element
+                textarea.value = value;
+            }
+        }
+        
+        // Tab switching logic for the editor
+        function switchToolPane(tool) {
+            
+            document.querySelectorAll('.tool-tab').forEach(tab => {
+                tab.classList.remove('border-teal-400', 'text-white');
+                tab.classList.add('border-transparent', 'text-gray-400');
+                if (tab.getAttribute('data-tool') === tool) {
+                    tab.classList.add('border-teal-400', 'text-white');
+                }
+            });
+
+            document.querySelectorAll('.tool-pane').forEach(pane => {
+                pane.classList.add('hidden');
+                if (pane.id === `tool-${tool}`) {
+                    pane.classList.remove('hidden');
+                }
+            });
+        }
+
+        // --- Drag and Drop Handlers ---
+
+        function addDragAndDropListeners() {
+            const preview = document.getElementById('website-preview');
+            
+            // Re-apply listeners to all current design elements
+            document.querySelectorAll('.design-element').forEach(el => {
+                el.onmousedown = null; 
+                el.onclick = null;
+                
+                el.onmousedown = (e) => {
+                    // Ignore clicks on input fields inside the element
+                    if (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT' || e.target.tagName === 'IMG') {
+                        return;
+                    }
+                    
+                    selectElement(el);
+
+                    isDragging = true;
+                    // Calculate offset from mouse to top-left corner of the element
+                    const rect = el.getBoundingClientRect();
+                    dragOffsetX = e.clientX - rect.left;
+                    dragOffsetY = e.clientY - rect.top;
+                    e.preventDefault(); 
+                };
+            });
+            
+            // Global listeners for movement and release
+            preview.onmousemove = (e) => {
+                if (!isDragging || !currentElement) return;
+
+                const previewRect = preview.getBoundingClientRect();
+                
+                let newLeft = e.clientX - previewRect.left - dragOffsetX;
+                let newTop = e.clientY - previewRect.top - dragOffsetY;
+
+                // Simple boundaries check (keep element within preview)
+                newLeft = Math.max(0, newLeft);
+                newTop = Math.max(0, newTop);
+
+                currentElement.style.left = `${newLeft}px`;
+                currentElement.style.top = `${newTop}px`;
+                
+                // Update properties panel input fields immediately
+                const propLeft = document.getElementById('prop-left');
+                const propTop = document.getElementById('prop-top');
+                if(propLeft && propTop) {
+                    propLeft.value = Math.round(newLeft);
+                    propTop.value = Math.round(newTop);
+                }
+            };
+
+            preview.onmouseup = () => {
+                isDragging = false;
+            };
+
+            // Click listener on the canvas to unselect elements
+            preview.onclick = (e) => {
+                if (!e.target.closest('.design-element') && !isDragging) {
+                    unselectAllElements();
+                }
+            };
+        }
+
+        // Event listener setup for editor tool tabs
+        function addToolPanelListeners() {
+             document.querySelectorAll('.tool-tab').forEach(tab => {
+                tab.addEventListener('click', (e) => {
+                    switchToolPane(e.target.getAttribute('data-tool'));
+                });
+            });
+        }
+
+        // --- Initial Load ---
+        window.onload = () => {
+            renderApp(); 
+        };
+
+    </script>
+</body>
+</html>
